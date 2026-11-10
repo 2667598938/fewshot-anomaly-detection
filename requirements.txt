@@ -1,0 +1,7 @@
+# torch / torchvision 请单独按 pytorch.org 给出的 CUDA 12.x 命令安装，
+# 不要写在这里，否则容易装成 CPU 版。
+anomalib>=2.0
+opencv-python
+matplotlib
+pandas
+tqdm
