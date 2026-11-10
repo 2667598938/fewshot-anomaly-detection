@@ -17,6 +17,9 @@ def main() -> None:
     parser.add_argument("--category", default="bottle", help="MVTec AD 类别名")
     parser.add_argument("--root", default="./datasets/MVTecAD", help="数据集根目录")
     parser.add_argument("--seed", type=int, default=42)
+    # 16G 内存的机器上 batch 开大会直接 bad allocation，默认给保守值
+    parser.add_argument("--batch", type=int, default=8)
+    parser.add_argument("--workers", type=int, default=2)
     args = parser.parse_args()
 
     import torch
@@ -25,13 +28,14 @@ def main() -> None:
     from anomalib.models import Patchcore
 
     torch.manual_seed(args.seed)
+    torch.set_float32_matmul_precision("high")
 
     datamodule = MVTecAD(
         root=args.root,
         category=args.category,
-        train_batch_size=32,
-        eval_batch_size=32,
-        num_workers=4,
+        train_batch_size=args.batch,
+        eval_batch_size=args.batch,
+        num_workers=args.workers,
     )
     model = Patchcore()
     engine = Engine(accelerator="gpu", devices=1)

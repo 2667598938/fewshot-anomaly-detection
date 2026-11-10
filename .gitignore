@@ -6,6 +6,7 @@ datasets/
 results/
 outputs/
 runs/
+.hf_cache/
 
 *.ckpt
 *.pt

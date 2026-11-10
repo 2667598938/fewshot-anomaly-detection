@@ -23,14 +23,18 @@ pip install -r requirements.txt
 # 3. 验证环境
 python check_env.py
 
-# 4. 跑第一个基线（bottle 单类）
-python run_baseline.py --category bottle
+# 4. 下载数据（anomalib 内置链接已失效，走这个脚本）
+python prepare_data.py --category bottle
+
+# 5. 跑第一个基线（bottle 单类）
+python run_baseline.py --category bottle --batch 8 --workers 2
 ```
 
 ## 目录
 
 ```
 check_env.py        环境自检，输出 torch / CUDA / anomalib 版本
+prepare_data.py     从 HF 镜像下载 MVTec AD 并整理成 anomalib 目录结构
 run_baseline.py     PatchCore 基线，单类跑通
 experiments/log.md  实验记录本，每次运行必须记一行
 datasets/           数据（不入库）
@@ -40,8 +44,10 @@ results/            输出（不入库）
 ## W1 验收标准
 
 - `python check_env.py` 输出 `cuda available: True` 且能打印出显卡名
-- `python run_baseline.py --category bottle` 跑完，image AUROC ≥ 0.98
+- `python run_baseline.py --category bottle --batch 8 --workers 2` 跑完，image AUROC ≥ 0.98
 - 在 `experiments/log.md` 里补上这一行记录
+
+已知数值（2026-11-10，seed=42）：image AUROC 1.0000 / pixel AUROC 0.9856，与原论文一致。
 
 ## 约定
 
