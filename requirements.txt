@@ -1,7 +1,17 @@
-# torch / torchvision 请单独按 pytorch.org 给出的 CUDA 12.x 命令安装，
-# 不要写在这里，否则容易装成 CPU 版。
-anomalib>=2.0
-opencv-python
-matplotlib
-pandas
-tqdm
+# 依赖锁定（2026-11-10 实测通过）
+#
+# PyTorch 必须按显卡的 CUDA 版本单独装，命令见 README：
+#   pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124
+# 先装 torch 再装这份，否则 anomalib 会从 PyPI 拉 CPU 版 torch。
+#
+# 环境基准：Windows / Python 3.12.0 / RTX 4070 Laptop 8G / 16G 内存
+
+anomalib==2.7.0
+lightning==2.6.6
+torchmetrics==1.9.0
+timm==1.0.31
+numpy==2.5.4
+opencv-python==5.0.0.93
+matplotlib==3.11.2
+pandas==3.1.1
+tqdm==4.70.1
