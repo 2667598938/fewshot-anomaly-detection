@@ -1,15 +1,16 @@
-"""PatchCore 基线，单类跑通。
+"""PatchCore 基线，单类运行。
 
 用法：
-    python run_baseline.py --category bottle --root ./datasets/MVTecAD
+    python run_baseline.py --category bottle --batch 8 --workers 2
+    python run_baseline.py --category bottle --out-json .cache/metrics/bottle.json
 
 说明：
-    本脚本按 anomalib 2.x 的 Engine API 写。若你的版本接口不同，
-    报错信息里会出现 ImportError 或 TypeError，把报错原文记下来，
-    改用官方 quickstart 的写法即可，不要在这里硬改。
+    本脚本按 anomalib 2.x 的 Engine API 写，已在本机验证通过（anomalib 2.7.0）。
 """
 
 import argparse
+import json
+from pathlib import Path
 
 
 def main() -> None:
@@ -20,6 +21,7 @@ def main() -> None:
     # 16G 内存的机器上 batch 开大会直接 bad allocation，默认给保守值
     parser.add_argument("--batch", type=int, default=8)
     parser.add_argument("--workers", type=int, default=2)
+    parser.add_argument("--out-json", default=None, help="把指标写到这个 json 文件")
     args = parser.parse_args()
 
     import torch
@@ -41,9 +43,35 @@ def main() -> None:
     engine = Engine(accelerator="gpu", devices=1)
 
     engine.fit(model=model, datamodule=datamodule)
-    engine.test(model=model, datamodule=datamodule)
+    results = engine.test(model=model, datamodule=datamodule)
 
-    print("\n结果在 results/ 下，把 image AUROC 记进 experiments/log.md")
+    metrics = {}
+    if results:
+        for key, value in results[0].items():
+            if isinstance(value, (int, float)):
+                metrics[key] = float(value)
+
+    print(f"\n==== {args.category} ====")
+    for key in sorted(metrics):
+        print(f"{key}: {metrics[key]:.4f}")
+
+    if args.out_json:
+        out = Path(args.out_json)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(
+            json.dumps(
+                {
+                    "category": args.category,
+                    "seed": args.seed,
+                    "batch": args.batch,
+                    "workers": args.workers,
+                    "metrics": metrics,
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
 
 
 if __name__ == "__main__":
